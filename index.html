@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>아이언클래드 카드 가이드</title>
+<style>
+  :root{--bg:#1a1a2e;--card:#24243e;--line:#3a3a5c;--txt:#e8e8f0;--sub:#9a9ab8;
+    --tS:#e74c3c;--tA:#e67e22;--tB:#f1c40f;--tC:#2ecc71;--tD:#7f8c8d;--t0:#5b7bd5;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;}
+  input.ctl{position:absolute;opacity:0;pointer-events:none;}
+  header{position:sticky;top:0;background:var(--bg);padding:12px 14px 8px;z-index:10;border-bottom:1px solid var(--line);}
+  h1{font-size:17px;margin:0 0 2px;}
+  .src{font-size:11px;color:var(--sub);margin-bottom:8px;}
+  #q{width:100%;padding:11px 14px;font-size:16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);outline:none;}
+  #q:focus{border-color:var(--t0);}
+  .jsnote{display:none;font-size:11px;color:#ffb366;margin-top:4px;}
+  .tabs{display:flex;gap:6px;margin-top:8px;}
+  .tab{flex:1;text-align:center;padding:8px 0;border-radius:8px;background:var(--card);color:var(--sub);font-size:13px;font-weight:bold;border:1px solid var(--line);cursor:pointer;display:block;}
+  .filters{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+  .f{padding:4px 10px;border-radius:12px;font-size:12px;border:1px solid var(--line);background:var(--card);color:var(--sub);cursor:pointer;display:inline-block;}
+  main{padding:10px 12px 60px;}
+  .cardrow{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+  .cardrow.hidekw{display:none!important;}
+  .top{display:flex;align-items:center;gap:8px;}
+  .nm{font-weight:bold;font-size:15px;flex:1;}
+  .en{color:var(--sub);font-size:11.5px;font-weight:normal;}
+  .b{display:inline-block;min-width:34px;text-align:center;padding:3px 7px;border-radius:7px;font-size:11.5px;font-weight:bold;color:#fff;}
+  .lbl{font-size:9px;display:block;opacity:.85;font-weight:normal;}
+  .pS{background:var(--tS)} .pA{background:var(--tA)} .pB{background:var(--tB);color:#222} .pC{background:var(--tC)} .pD{background:var(--tD)} .p0{background:var(--t0)}
+  .eff{margin-top:6px;font-size:12.5px;color:var(--sub);}
+  .eff b{color:var(--txt);font-weight:normal;}
+  .note{margin-top:4px;font-size:12px;color:#8fd0ff;}
+  #guide h2{font-size:15px;color:#8fd0ff;margin:18px 0 6px;}
+  #guide p,#guide li{font-size:13.5px;line-height:1.65;color:var(--txt);}
+  #guide ol{padding-left:20px;margin:4px 0;}
+  #guide .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 14px 10px;margin-bottom:10px;}
+  .hl{color:#ffd166;}
+  .legend{font-size:11px;color:var(--sub);margin:2px 0 10px;line-height:1.6;}
+
+  /* ===== CSS 전용 상태 제어 (JS 불필요) ===== */
+  /* 탭 */
+  #guide{display:none;}
+  #vGuide:checked ~ main #guide{display:block;}
+  #vGuide:checked ~ main #list{display:none;}
+  #vGuide:checked ~ header .filters,#vGuide:checked ~ header #q,#vGuide:checked ~ header .jsnote{display:none;}
+  #vCards:checked ~ header label[for=vCards],#vGuide:checked ~ header label[for=vGuide]{background:var(--t0);color:#fff;border-color:var(--t0);}
+  /* 티어 필터 */
+  #tS:checked ~ main #list .cardrow:not([data-tier=S]){display:none;}
+  #tA:checked ~ main #list .cardrow:not([data-tier=A]){display:none;}
+  #tB:checked ~ main #list .cardrow:not([data-tier=B]){display:none;}
+  #tC:checked ~ main #list .cardrow:not([data-tier=C]){display:none;}
+  #tD:checked ~ main #list .cardrow:not([data-tier=D]){display:none;}
+  #t0:checked ~ main #list .cardrow:not([data-tier=기본]){display:none;}
+  #tAll:checked ~ header label[for=tAll]{color:#fff;border-color:#fff;}
+  #tS:checked ~ header label[for=tS]{color:var(--tS);border-color:var(--tS);}
+  #tA:checked ~ header label[for=tA]{color:var(--tA);border-color:var(--tA);}
+  #tB:checked ~ header label[for=tB]{color:var(--tB);border-color:var(--tB);}
+  #tC:checked ~ header label[for=tC]{color:var(--tC);border-color:var(--tC);}
+  #tD:checked ~ header label[for=tD]{color:var(--tD);border-color:var(--tD);}
+  #t0:checked ~ header label[for=t0]{color:var(--t0);border-color:var(--t0);}
+</style>
+</head>
+<body>
+<input class="ctl" type="radio" name="view" id="vCards" checked>
+<input class="ctl" type="radio" name="view" id="vGuide">
+<input class="ctl" type="radio" name="tier" id="tAll" checked>
+<input class="ctl" type="radio" name="tier" id="tS">
+<input class="ctl" type="radio" name="tier" id="tA">
+<input class="ctl" type="radio" name="tier" id="tB">
+<input class="ctl" type="radio" name="tier" id="tC">
+<input class="ctl" type="radio" name="tier" id="tD">
+<input class="ctl" type="radio" name="tier" id="t0">
+<header>
+  <h1>아이언클래드 카드 가이드 <span class="en">Slay the Spire</span></h1>
+  <div class="src">픽 티어: Baalorlord / 강화 우선순위: 소멸덱 기준 참고치</div>
+  <input id="q" type="search" placeholder="카드 이름 검색 (한글/영문)…" autocomplete="off">
+  <div class="jsnote" id="jsnote">※ 이 뷰어(미리보기)에서는 검색이 지원되지 않습니다. 티어 필터는 사용 가능합니다.</div>
+  <div class="tabs">
+    <label class="tab" for="vCards">카드 목록</label>
+    <label class="tab" for="vGuide">소멸덱 운영 요령</label>
+  </div>
+  <div class="filters">
+    <label class="f" for="tAll">전체</label>
+    <label class="f" for="tS">S</label>
+    <label class="f" for="tA">A</label>
+    <label class="f" for="tB">B</label>
+    <label class="f" for="tC">C</label>
+    <label class="f" for="tD">D</label>
+    <label class="f" for="t0">기본</label>
+  </div>
+</header>
+<main>
+  <div id="list">
+<div class="cardrow" data-kr="타격" data-en="strike" data-tier="기본">
+<div class="top"><div class="nm">타격 <span class="en">Strike</span></div>
+<span class="b p0"><span class="lbl">픽</span>기본</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 6→9</b></div><div class="note">제거 1순위</div></div>
+<div class="cardrow" data-kr="수비" data-en="defend" data-tier="기본">
+<div class="top"><div class="nm">수비 <span class="en">Defend</span></div>
+<span class="b p0"><span class="lbl">픽</span>기본</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>방어도 5→8</b></div><div class="note">제거 후순위</div></div>
+<div class="cardrow" data-kr="강타" data-en="bash" data-tier="기본">
+<div class="top"><div class="nm">강타 <span class="en">Bash</span></div>
+<span class="b p0"><span class="lbl">픽</span>기본</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 8→10, 취약 2→3</b></div></div>
+<div class="cardrow" data-kr="분노" data-en="anger" data-tier="B">
+<div class="top"><div class="nm">분노 <span class="en">Anger</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 6→8</b></div><div class="note">0코, 드로우 많으면 후반에도 유효</div></div>
+<div class="cardrow" data-kr="전투장비" data-en="armaments" data-tier="B">
+<div class="top"><div class="nm">전투장비 <span class="en">Armaments</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>손패 전체 강화 (강화가 본체)</b></div><div class="note">룬 피라미드·스네코와 궁합</div></div>
+<div class="cardrow" data-kr="몸통 박치기" data-en="body slam" data-tier="A">
+<div class="top"><div class="nm">몸통 박치기 <span class="en">Body Slam</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>비용 1→0</b></div><div class="note">바리케이드·무적과 연계 시 주력 딜</div></div>
+<div class="cardrow" data-kr="격돌" data-en="clash" data-tier="C">
+<div class="top"><div class="nm">격돌 <span class="en">Clash</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 14→18</b></div><div class="note">저승천에선 쓸만, A10+ 비추</div></div>
+<div class="cardrow" data-kr="절단" data-en="cleave" data-tier="C">
+<div class="top"><div class="nm">절단 <span class="en">Cleave</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 8→11</b></div><div class="note">광역기 중 최하위</div></div>
+<div class="cardrow" data-kr="클로스라인" data-en="clothesline" data-tier="C">
+<div class="top"><div class="nm">클로스라인 <span class="en">Clothesline</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 12→14, 약화 2→3</b></div></div>
+<div class="cardrow" data-kr="몸 풀기" data-en="flex" data-tier="C">
+<div class="top"><div class="nm">몸 풀기 <span class="en">Flex</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>힘 2→4</b></div><div class="note">강화 의존 높음</div></div>
+<div class="cardrow" data-kr="파괴" data-en="havoc" data-tier="D">
+<div class="top"><div class="nm">파괴 <span class="en">Havoc</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b pD"><span class="lbl">강화</span>D</span></div>
+<div class="eff">강화: <b>비용 1→0</b></div><div class="note">불안정, 자해 사고 주의</div></div>
+<div class="cardrow" data-kr="박치기" data-en="headbutt" data-tier="A">
+<div class="top"><div class="nm">박치기 <span class="en">Headbutt</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 9→12</b></div><div class="note">버린 더미 회수 = 덱 조작 핵심</div></div>
+<div class="cardrow" data-kr="대검" data-en="heavy blade" data-tier="C">
+<div class="top"><div class="nm">대검 <span class="en">Heavy Blade</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>힘 배수 3→5</b></div><div class="note">힘덱 한정</div></div>
+<div class="cardrow" data-kr="철의 파동" data-en="iron wave" data-tier="C">
+<div class="top"><div class="nm">철의 파동 <span class="en">Iron Wave</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해/방어 5→7</b></div></div>
+<div class="cardrow" data-kr="완벽한 타격" data-en="perfected strike" data-tier="C">
+<div class="top"><div class="nm">완벽한 타격 <span class="en">Perfected Strike</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>장당 추가 2→3</b></div><div class="note">전용덱 아니면 후반 감가</div></div>
+<div class="cardrow" data-kr="폼멜 타격" data-en="pommel strike" data-tier="B">
+<div class="top"><div class="nm">폼멜 타격 <span class="en">Pommel Strike</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 9→10, 드로우 1→2</b></div><div class="note">드로우 강화가 핵심</div></div>
+<div class="cardrow" data-kr="흘려보내기" data-en="shrug it off" data-tier="A">
+<div class="top"><div class="nm">흘려보내기 <span class="en">Shrug It Off</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>방어도 8→11</b></div><div class="note">타락덱에선 몇 장이든 OK</div></div>
+<div class="cardrow" data-kr="부메랑 칼날" data-en="sword boomerang" data-tier="B">
+<div class="top"><div class="nm">부메랑 칼날 <span class="en">Sword Boomerang</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>3회→4회</b></div><div class="note">힘 시너지 최고 효율</div></div>
+<div class="cardrow" data-kr="천둥" data-en="thunderclap" data-tier="C">
+<div class="top"><div class="nm">천둥 <span class="en">Thunderclap</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 4→7</b></div></div>
+<div class="cardrow" data-kr="진정한 끈기" data-en="true grit" data-tier="B">
+<div class="top"><div class="nm">진정한 끈기 <span class="en">True Grit</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>무작위 소멸 → 선택 소멸 (기능 변화)</b></div><div class="note">강화 전후 체감 큼</div></div>
+<div class="cardrow" data-kr="이중 타격" data-en="twin strike" data-tier="B">
+<div class="top"><div class="nm">이중 타격 <span class="en">Twin Strike</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>5×2 → 7×2</b></div></div>
+<div class="cardrow" data-kr="전투의 함성" data-en="warcry" data-tier="D">
+<div class="top"><div class="nm">전투의 함성 <span class="en">Warcry</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b pD"><span class="lbl">강화</span>D</span></div>
+<div class="eff">강화: <b>드로우 1→2</b></div><div class="note">저impact</div></div>
+<div class="cardrow" data-kr="난폭한 타격" data-en="wild strike" data-tier="D">
+<div class="top"><div class="nm">난폭한 타격 <span class="en">Wild Strike</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b pD"><span class="lbl">강화</span>D</span></div>
+<div class="eff">강화: <b>피해 12→17</b></div><div class="note">상처가 드로우 1개를 깎음</div></div>
+<div class="cardrow" data-kr="전투 최면" data-en="battle trance" data-tier="A">
+<div class="top"><div class="nm">전투 최면 <span class="en">Battle Trance</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>드로우 3→4</b></div><div class="note">0코 드로우, 1~2장 상비</div></div>
+<div class="cardrow" data-kr="피에는 피" data-en="blood for blood" data-tier="B">
+<div class="top"><div class="nm">피에는 피 <span class="en">Blood for Blood</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>시작 비용 4→3</b></div><div class="note">자해·피격으로 금방 0코</div></div>
+<div class="cardrow" data-kr="사혈" data-en="bloodletting" data-tier="B">
+<div class="top"><div class="nm">사혈 <span class="en">Bloodletting</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>에너지 2→3</b></div><div class="note">2.2패치 버프 후 우수</div></div>
+<div class="cardrow" data-kr="불타는 조약" data-en="burning pact" data-tier="B">
+<div class="top"><div class="nm">불타는 조약 <span class="en">Burning Pact</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>드로우 2→3</b></div><div class="note">지정 소멸 = 소멸덱 윤활유</div></div>
+<div class="cardrow" data-kr="대학살" data-en="carnage" data-tier="C">
+<div class="top"><div class="nm">대학살 <span class="en">Carnage</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 20→28</b></div><div class="note">초반 하이킥, 안 쓰면 알아서 소멸</div></div>
+<div class="cardrow" data-kr="연소" data-en="combust" data-tier="B">
+<div class="top"><div class="nm">연소 <span class="en">Combust</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 5→7</b></div><div class="note">다수전 약점 보완</div></div>
+<div class="cardrow" data-kr="어둠의 포옹" data-en="dark embrace" data-tier="S">
+<div class="top"><div class="nm">어둠의 포옹 <span class="en">Dark Embrace</span></div>
+<span class="b pS"><span class="lbl">픽</span>S</span>
+<span class="b pS"><span class="lbl">강화</span>S</span></div>
+<div class="eff">강화: <b>비용 2→1</b></div><div class="note">소멸덱 드로우 엔진, 1~2장 필수</div></div>
+<div class="cardrow" data-kr="무장 해제" data-en="disarm" data-tier="A">
+<div class="top"><div class="nm">무장 해제 <span class="en">Disarm</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>힘 감소 -2→-3</b></div><div class="note">한 장으로 방어 해결(심장전 필수급)</div></div>
+<div class="cardrow" data-kr="드롭킥" data-en="dropkick" data-tier="B">
+<div class="top"><div class="nm">드롭킥 <span class="en">Dropkick</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 5→8</b></div><div class="note">압축+취약 확보 시 무한 가능</div></div>
+<div class="cardrow" data-kr="이도류" data-en="dual wield" data-tier="C">
+<div class="top"><div class="nm">이도류 <span class="en">Dual Wield</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>복사 1→2</b></div><div class="note">0코 카드와 조합할 때만</div></div>
+<div class="cardrow" data-kr="참호" data-en="entrench" data-tier="C">
+<div class="top"><div class="nm">참호 <span class="en">Entrench</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>비용 2→1</b></div><div class="note">바리케이드·캘리퍼스 있을 때만</div></div>
+<div class="cardrow" data-kr="진화" data-en="evolve" data-tier="B">
+<div class="top"><div class="nm">진화 <span class="en">Evolve</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>드로우 1→2</b></div><div class="note">상태이상을 연료로 전환</div></div>
+<div class="cardrow" data-kr="무감각" data-en="feel no pain" data-tier="S">
+<div class="top"><div class="nm">무감각 <span class="en">Feel No Pain</span></div>
+<span class="b pS"><span class="lbl">픽</span>S</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>방어도 3→4</b></div><div class="note">강화 없이도 충분, 픽은 최우선</div></div>
+<div class="cardrow" data-kr="불 뿜기" data-en="fire breathing" data-tier="C">
+<div class="top"><div class="nm">불 뿜기 <span class="en">Fire Breathing</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 6→10</b></div><div class="note">진화류와 달리 불안정</div></div>
+<div class="cardrow" data-kr="화염 장벽" data-en="flame barrier" data-tier="B">
+<div class="top"><div class="nm">화염 장벽 <span class="en">Flame Barrier</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>방어 12→16, 반사 4→6</b></div><div class="note">다단히트 적 상대 효율 최고</div></div>
+<div class="cardrow" data-kr="유령 갑옷" data-en="ghostly armor" data-tier="B">
+<div class="top"><div class="nm">유령 갑옷 <span class="en">Ghostly Armor</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>방어도 10→13</b></div><div class="note">에테리얼 주의</div></div>
+<div class="cardrow" data-kr="혈류" data-en="hemokinesis" data-tier="B">
+<div class="top"><div class="nm">혈류 <span class="en">Hemokinesis</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 15→20</b></div><div class="note">자해=파열·피에는피 연료</div></div>
+<div class="cardrow" data-kr="지옥검" data-en="infernal blade" data-tier="B">
+<div class="top"><div class="nm">지옥검 <span class="en">Infernal Blade</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>비용 1→0</b></div><div class="note">무작위지만 소멸 1회 트리거</div></div>
+<div class="cardrow" data-kr="발화" data-en="inflame" data-tier="B">
+<div class="top"><div class="nm">발화 <span class="en">Inflame</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>힘 2→3</b></div></div>
+<div class="cardrow" data-kr="위압" data-en="intimidate" data-tier="C">
+<div class="top"><div class="nm">위압 <span class="en">Intimidate</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>약화 1→2</b></div><div class="note">드로우 엔진 있을 때만</div></div>
+<div class="cardrow" data-kr="금속화" data-en="metallicize" data-tier="C">
+<div class="top"><div class="nm">금속화 <span class="en">Metallicize</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>방어도 3→4</b></div><div class="note">최대 1장, 후반 스케일 없음</div></div>
+<div class="cardrow" data-kr="난관 극복" data-en="power through" data-tier="A">
+<div class="top"><div class="nm">난관 극복 <span class="en">Power Through</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>방어도 15→20</b></div><div class="note">1코 최고 방어, 상처는 기사회생 연료</div></div>
+<div class="cardrow" data-kr="연타" data-en="pummel" data-tier="B">
+<div class="top"><div class="nm">연타 <span class="en">Pummel</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>4회→5회</b></div></div>
+<div class="cardrow" data-kr="격노" data-en="rage" data-tier="C">
+<div class="top"><div class="nm">격노 <span class="en">Rage</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>방어도 3→5</b></div><div class="note">공격 몰아치는 턴 한정</div></div>
+<div class="cardrow" data-kr="광란" data-en="rampage" data-tier="D">
+<div class="top"><div class="nm">광란 <span class="en">Rampage</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>증가량 5→8</b></div><div class="note">선형 성장이라 후반 한계</div></div>
+<div class="cardrow" data-kr="무모한 돌진" data-en="reckless charge" data-tier="C">
+<div class="top"><div class="nm">무모한 돌진 <span class="en">Reckless Charge</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 7→10</b></div><div class="note">현기증은 소멸돼 무감각과 호환</div></div>
+<div class="cardrow" data-kr="파열" data-en="rupture" data-tier="B">
+<div class="top"><div class="nm">파열 <span class="en">Rupture</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>힘 1→2</b></div><div class="note">고통 저주와 조합 시 폭발</div></div>
+<div class="cardrow" data-kr="불태우는 일격" data-en="searing blow" data-tier="D">
+<div class="top"><div class="nm">불태우는 일격 <span class="en">Searing Blow</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b p0"><span class="lbl">강화</span>특수</span></div>
+<div class="eff">강화: <b>무한 강화 가능 (+4,+5,+6…)</b></div><div class="note">초반에 받아 다중 강화할 때만</div></div>
+<div class="cardrow" data-kr="기사회생" data-en="second wind" data-tier="A">
+<div class="top"><div class="nm">기사회생 <span class="en">Second Wind</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>장당 방어 5→7</b></div><div class="note">난관 극복과 세트</div></div>
+<div class="cardrow" data-kr="혈안" data-en="seeing red" data-tier="C">
+<div class="top"><div class="nm">혈안 <span class="en">Seeing Red</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>비용 1→0</b></div><div class="note">타락덱에선 공짜 에너지 2</div></div>
+<div class="cardrow" data-kr="감시병" data-en="sentinel" data-tier="C">
+<div class="top"><div class="nm">감시병 <span class="en">Sentinel</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>방어 5→8, 에너지 2→3</b></div><div class="note">타락으로 태우면 배터리</div></div>
+<div class="cardrow" data-kr="영혼 절단" data-en="sever soul" data-tier="D">
+<div class="top"><div class="nm">영혼 절단 <span class="en">Sever Soul</span></div>
+<span class="b pD"><span class="lbl">픽</span>D</span>
+<span class="b pD"><span class="lbl">강화</span>D</span></div>
+<div class="eff">강화: <b>피해 16→22</b></div><div class="note">같은 일 하는 카드가 전부 상위호환</div></div>
+<div class="cardrow" data-kr="충격파" data-en="shockwave" data-tier="A">
+<div class="top"><div class="nm">충격파 <span class="en">Shockwave</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>약화/취약 3→5</b></div><div class="note">강화 1장이면 디버프 끝</div></div>
+<div class="cardrow" data-kr="약점 분석" data-en="spot weakness" data-tier="B">
+<div class="top"><div class="nm">약점 분석 <span class="en">Spot Weakness</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>힘 3→4</b></div><div class="note">룬 돔과 역시너지 주의</div></div>
+<div class="cardrow" data-kr="어퍼컷" data-en="uppercut" data-tier="B">
+<div class="top"><div class="nm">어퍼컷 <span class="en">Uppercut</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>약화/취약 1→2</b></div></div>
+<div class="cardrow" data-kr="소용돌이" data-en="whirlwind" data-tier="B">
+<div class="top"><div class="nm">소용돌이 <span class="en">Whirlwind</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>타당 피해 5→8</b></div><div class="note">힘+에너지 있으면 피니셔</div></div>
+<div class="cardrow" data-kr="바리케이드" data-en="barricade" data-tier="B">
+<div class="top"><div class="nm">바리케이드 <span class="en">Barricade</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>비용 3→2</b></div><div class="note">몸통 박치기·참호와 세트, 후반용</div></div>
+<div class="cardrow" data-kr="광폭화" data-en="berserk" data-tier="C">
+<div class="top"><div class="nm">광폭화 <span class="en">Berserk</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>자처 취약 2→1</b></div><div class="note">보틀 토네이도 있으면 재평가</div></div>
+<div class="cardrow" data-kr="몽둥이질" data-en="bludgeon" data-tier="C">
+<div class="top"><div class="nm">몽둥이질 <span class="en">Bludgeon</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 32→42</b></div><div class="note">1막 해결사</div></div>
+<div class="cardrow" data-kr="잔혹성" data-en="brutality" data-tier="B">
+<div class="top"><div class="nm">잔혹성 <span class="en">Brutality</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>선천성 부여</b></div><div class="note">매턴 드로우+1, 파열과 조합</div></div>
+<div class="cardrow" data-kr="타락" data-en="corruption" data-tier="S">
+<div class="top"><div class="nm">타락 <span class="en">Corruption</span></div>
+<span class="b pS"><span class="lbl">픽</span>S</span>
+<span class="b pS"><span class="lbl">강화</span>S</span></div>
+<div class="eff">강화: <b>비용 3→2</b></div><div class="note">소멸덱 심장, 강화 1순위</div></div>
+<div class="cardrow" data-kr="악마의 형상" data-en="demon form" data-tier="C">
+<div class="top"><div class="nm">악마의 형상 <span class="en">Demon Form</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>힘 2→3</b></div><div class="note">3코가 무거움, 느린 전투용</div></div>
+<div class="cardrow" data-kr="연사" data-en="double tap" data-tier="C">
+<div class="top"><div class="nm">연사 <span class="en">Double Tap</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>1회→2회</b></div><div class="note">사신·화형·소용돌이 복사용</div></div>
+<div class="cardrow" data-kr="발굴" data-en="exhume" data-tier="B">
+<div class="top"><div class="nm">발굴 <span class="en">Exhume</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>비용 1→0</b></div><div class="note">소멸 카드 재활용(포식·무장해제)</div></div>
+<div class="cardrow" data-kr="포식" data-en="feed" data-tier="A">
+<div class="top"><div class="nm">포식 <span class="en">Feed</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 10→12, 최대체력 +3→+4</b></div><div class="note">최대체력 스케일링, 매 전투 성실하게</div></div>
+<div class="cardrow" data-kr="지옥불" data-en="fiend fire" data-tier="A">
+<div class="top"><div class="nm">지옥불 <span class="en">Fiend Fire</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>장당 피해 7→10</b></div><div class="note">손 전체 소멸 = 엔진 대량 트리거 피니셔</div></div>
+<div class="cardrow" data-kr="화형" data-en="immolate" data-tier="A">
+<div class="top"><div class="nm">화형 <span class="en">Immolate</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>피해 21→28</b></div><div class="note">최고의 광역기</div></div>
+<div class="cardrow" data-kr="무적" data-en="impervious" data-tier="A">
+<div class="top"><div class="nm">무적 <span class="en">Impervious</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pB"><span class="lbl">강화</span>B</span></div>
+<div class="eff">강화: <b>방어도 30→40</b></div><div class="note">보스전 필수급 방어</div></div>
+<div class="cardrow" data-kr="절대적인 힘" data-en="juggernaut" data-tier="C">
+<div class="top"><div class="nm">절대적인 힘 <span class="en">Juggernaut</span></div>
+<span class="b pC"><span class="lbl">픽</span>C</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 5→7</b></div><div class="note">소형 방어 다수와 조합해야 함</div></div>
+<div class="cardrow" data-kr="한계 돌파" data-en="limit break" data-tier="B">
+<div class="top"><div class="nm">한계 돌파 <span class="en">Limit Break</span></div>
+<span class="b pB"><span class="lbl">픽</span>B</span>
+<span class="b pS"><span class="lbl">강화</span>S</span></div>
+<div class="eff">강화: <b>소멸 제거 (기능 변화)</b></div><div class="note">강화 시 무한 재사용 → 힘 폭증</div></div>
+<div class="cardrow" data-kr="제물" data-en="offering" data-tier="S">
+<div class="top"><div class="nm">제물 <span class="en">Offering</span></div>
+<span class="b pS"><span class="lbl">픽</span>S</span>
+<span class="b pA"><span class="lbl">강화</span>A</span></div>
+<div class="eff">강화: <b>드로우 3→5</b></div><div class="note">사실상 추가 턴, 거의 상시 픽</div></div>
+<div class="cardrow" data-kr="사신" data-en="reaper" data-tier="A">
+<div class="top"><div class="nm">사신 <span class="en">Reaper</span></div>
+<span class="b pA"><span class="lbl">픽</span>A</span>
+<span class="b pC"><span class="lbl">강화</span>C</span></div>
+<div class="eff">강화: <b>피해 4→5</b></div><div class="note">힘과 조합 시 체력 회복 엔진</div></div>
+  </div>
+  <div id="guide">
+    <div class="legend">※ 아이언클래드의 정답 플랜으로 통하는 <b>소멸(Exhaust)덱</b> 기준 설명입니다. 픽 티어 출처는 Baalorlord 카드 랭킹, 강화 우선순위는 커뮤니티 통설 기반 참고치입니다.</div>
+    <div class="box">
+      <h2>① 엔진 구조</h2>
+      <p><span class="hl">타락</span>(스킬 0코스트+사용 시 소멸) → 스킬이 공짜로 나가며 소멸 → <span class="hl">어둠의 포옹</span>(소멸 시 드로우) + <span class="hl">무감각</span>(소멸 시 방어도)이 매번 발동. 스킬 한 장이 "0코스트: 원래 효과 + 드로우 + 방어도 4"가 됩니다. 유물 <span class="hl">죽은 나뭇가지</span>(소멸 시 무작위 카드 획득)가 붙으면 준무한 엔진.</p>
+    </div>
+    <div class="box">
+      <h2>② 운영 순서</h2>
+      <ol>
+        <li><b>1막은 소멸덱을 하지 않습니다.</b> 몽둥이질·피에는 피·충격파·폼멜 타격 등 전투력과 생존 위주로 픽하고, 소멸 파츠는 2막부터 조립. 타락은 스킬 6~7장은 있어야 제값.</li>
+        <li>코어 파워 픽 순서: <b>무감각 ≥ 어둠의 포옹 &gt; 타락</b>. 무감각·포옹은 단독으로도 일하지만 타락은 스킬 비중이 받쳐줘야 하고 3코라 템포 손실이 큼(혈안·사혈·감시병·제물로 보완).</li>
+        <li><b>타락이 있으면 스킬 다다익선</b> — 흘려보내기는 몇 장이든 좋고, 감시병은 0코 소멸 시 에너지 +2~3 배터리, 혈안도 공짜 에너지가 됩니다.</li>
+        <li><b>난관 극복 + 기사회생 콤보</b>: 상처가 손에 있을 때 기사회생으로 비공격 카드 일괄 소멸 → 장당 방어도 + 무감각·포옹 연쇄. 이 조합만으로 방어가 해결됩니다.</li>
+        <li><b>딜 플랜은 반드시 별도 확보</b>: 지옥불(손 전체 소멸 피니셔), 몸통 박치기(0코 강화+바리케이드/무적 연계), 사신+힘 중 하나는 꼭. 방어만 쌓다 말라죽는 게 이 덱의 패배 패턴.</li>
+        <li>상태이상·저주도 연료: 진화가 있으면 화상·상처가 드로우로 바뀌고, 태우면 무감각까지 발동.</li>
+        <li>궁합 유물: 죽은 나뭇가지, 카론의 유골, 미라의 손, 새 얼굴 항아리, 룬 피라미드.</li>
+      </ol>
+    </div>
+    <div class="box">
+      <h2>③ 대장간(강화) 순서</h2>
+      <p>원칙: <b>비용이 줄거나 기능이 바뀌는 강화 &gt; 수치 강화</b>. 1막에선 엔진이 없으니 몽둥이질·피에는 피 등 딜 카드 먼저, 타락·포옹 강화는 집은 뒤 2막 이후에. 무감각은 강화 없이도 제 몫을 하므로 후순위.</p>
+    </div>
+  </div>
+</main>
+<script>
+// 검색만 JS 담당 (QuickLook 등 JS 미지원 뷰어에서는 아래 안내문 표시 로직도 안 돌므로
+// 기본적으로 안내문은 숨겨져 있고, JS가 돌면 검색창이 활성화된 상태가 된다)
+var q=document.getElementById('q');
+function search(){
+  var kw=(q.value||'').trim().toLowerCase();
+  var cards=document.querySelectorAll('#list .cardrow');
+  for(var i=0;i<cards.length;i++){
+    var c=cards[i];
+    var hit=!kw || c.getAttribute('data-kr').indexOf(kw)>=0 || c.getAttribute('data-en').indexOf(kw)>=0;
+    if(hit){c.classList.remove('hidekw');}else{c.classList.add('hidekw');}
+  }
+}
+q.addEventListener('input',search);
+function resync(){ try{ search(); }catch(e){} }
+window.addEventListener('pageshow',resync);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)resync();});
+</script>
+<noscript><style>#q{display:none}.jsnote{display:block!important}</style></noscript>
+</body>
+</html>
